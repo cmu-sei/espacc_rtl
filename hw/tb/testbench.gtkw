@@ -1,0 +1,66 @@
+[*]
+[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
+[*] Wed May  8 15:28:40 2024
+[*]
+[dumpfile] "/home/espuser/esp/accelerators/rtl/espacc_rtl/hw/tb/espacc.vcd"
+[dumpfile_mtime] "Wed May  8 15:28:28 2024"
+[dumpfile_size] 5195
+[savefile] "/home/espuser/esp/accelerators/rtl/espacc_rtl/hw/tb/testbench.gtkw"
+[timestart] 0
+[size] 1801 751
+[pos] -1 -1
+*-13.000000 9700 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] espacc_tb.
+[sst_width] 235
+[signals_width] 391
+[sst_expanded] 1
+[sst_vpaned_height] 213
+@28
+espacc_tb.dut.clk
+@22
+espacc_tb.dut.dma_read_ctrl_data_index[31:0]
+espacc_tb.dut.dma_read_ctrl_data_length[31:0]
+@28
+espacc_tb.dut.dma_read_ctrl_data_size[2:0]
+espacc_tb.dut.dma_read_ctrl_valid
+espacc_tb.dut.dma_read_ctrl_ready
+@22
+espacc_tb.dut.dma_read_chnl_data[63:0]
+@28
+espacc_tb.dut.dma_read_chnl_valid
+espacc_tb.dut.dma_read_chnl_ready
+espacc_tb.dut.rst
+@22
+espacc_tb.dut.conf_info_reg0[31:0]
+espacc_tb.dut.conf_info_reg1[31:0]
+@28
+espacc_tb.dut.conf_done
+espacc_tb.dut.clk
+@22
+espacc_tb.dut.dma_write_ctrl_data_index[31:0]
+espacc_tb.dut.dma_write_ctrl_data_length[31:0]
+@28
+espacc_tb.dut.dma_write_ctrl_data_size[2:0]
+espacc_tb.dut.dma_write_ctrl_valid
+espacc_tb.dut.dma_write_ctrl_ready
+@24
+espacc_tb.dut.dma_write_chnl_data[63:0]
+@28
+espacc_tb.dut.dma_write_chnl_valid
+espacc_tb.dut.dma_write_chnl_ready
+@22
+espacc_tb.dut.debug[31:0]
+@28
+espacc_tb.acc_done
+espacc_tb.dut.state[2:0]
+espacc_tb.dut.pgm_read
+@22
+espacc_tb.dut.beat_ctr[31:0]
+@28
+espacc_tb.dut.configured
+@22
+espacc_tb.dut.prog_num_instr[31:0]
+@23
+espacc_tb.dut.prog_host_base_addr[31:0]
+[pattern_trace] 1
+[pattern_trace] 0

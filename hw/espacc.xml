@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sld>
+  <accelerator name="espacc" desc="Accelerator ESPACC" data_size="4" device_id="075" hls_tool="rtl">
+    <param name="reg0" desc="reg0" />
+    <param name="reg1" desc="reg1" />
+  </accelerator>
+</sld>
