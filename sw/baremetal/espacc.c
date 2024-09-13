@@ -209,8 +209,8 @@ int main(int argc, char * argv[])
 #ifndef __riscv
 		for (coherence = ACC_COH_NONE; coherence <= ACC_COH_RECALL; coherence++) {
 #else
-                for (size_t ii=0; ii < 2; ii++)
-                {
+                for (size_t ii=0; ii<2; ii++)
+		{
 			/* TODO: Restore full test once ESP caches are integrated */
 			coherence = ACC_COH_NONE;
 #endif

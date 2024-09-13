@@ -139,7 +139,7 @@ module espacc_rtl_basic_dma
    // program and data memory
    reg [31:0]    PGM  [0:HOST_MAX_INSTR-1]; // program memory
    reg [31:0]    DATA [0:HOST_MAX_DATA-1];  // data memory
-   reg           pgm_read; // whether the program has been read
+   reg           pgm_read; // whether the program has been read, past tense
 
    reg [31:0] 	 debug0;
    reg [31:0] 	 debug1;
@@ -314,6 +314,7 @@ module espacc_rtl_basic_dma
                  pass_ctr <= pass_ctr + 1; // all beats done, increment pass
                  if (pass_ctr == num_passes - 1) begin // passes not done
                     acc_done <= 1'b1;
+		    pgm_read <= 1'b0; // lower pgm_read to stay IDLE
                  end
 		 dma_write_chnl_valid <= 1'b0;
                  state <= IDLE;
