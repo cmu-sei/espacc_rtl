@@ -142,7 +142,7 @@ int main(int argc, char * argv[])
 
 	printf("DMA_WORD_PER_BEAT(sizeof(token_t)): %d\n",
 	       DMA_WORD_PER_BEAT(sizeof(token_t)));
-	
+
 	if (DMA_WORD_PER_BEAT(sizeof(token_t)) == 0) {
 		in_words_adj = 8;
 		out_words_adj = 8;
@@ -209,7 +209,8 @@ int main(int argc, char * argv[])
 #ifndef __riscv
 		for (coherence = ACC_COH_NONE; coherence <= ACC_COH_RECALL; coherence++) {
 #else
-		{
+                for (size_t ii=0; ii < 2; ii++)
+                {
 			/* TODO: Restore full test once ESP caches are integrated */
 			coherence = ACC_COH_NONE;
 #endif
@@ -256,7 +257,6 @@ int main(int argc, char * argv[])
 				done &= STATUS_MASK_DONE;
 			}
 			iowrite32(dev, CMD_REG, 0x0);
-
 			printf("  Done\n");
 			printf("  validating...\n");
 

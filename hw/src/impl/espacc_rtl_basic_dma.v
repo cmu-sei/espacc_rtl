@@ -155,7 +155,7 @@ module espacc_rtl_basic_dma
    end
 
    always @(posedge clk or negedge rst) begin
-      if (!rst) begin 
+      if (!rst) begin
 	 acc_done <= 1'b0;
          // move to IDLE state, keep coming back here while !rst
          // control signals
@@ -227,7 +227,7 @@ module espacc_rtl_basic_dma
            end // case: READ_CTRL
            READ_CHNL: begin // 010
               dma_read_chnl_ready <= 1'b1; // buffers known ahead of time
-              if (dma_read_chnl_valid) begin 
+              if (dma_read_chnl_valid) begin
 
                  if (!pgm_read) begin // reading the program
                     PGM[vals_per_beat*beat_ctr] <= dma_read_chnl_data[31:0];
@@ -268,7 +268,7 @@ module espacc_rtl_basic_dma
                 <= DATA[pass_ctr*beats_per_pass*vals_per_beat + beat_ctr];
 	      debug1
                 <= 2*DATA[pass_ctr*beats_per_pass*vals_per_beat + beat_ctr];
-              beat_ctr <= beat_ctr + 1; 
+              beat_ctr <= beat_ctr + 1;
 
               if (beat_ctr == beats_per_pass*vals_per_beat - 1) begin
                  // set write ctrl values
@@ -298,7 +298,7 @@ module espacc_rtl_basic_dma
            end // case: WRITE_CTRL
            WRITE_CHNL: begin // 101
 	      dma_write_chnl_valid <= 1'b1;
-	      
+
               if (dma_write_chnl_ready) begin
 		 // is it possible that this reads past the end of DATA?
 		 dma_write_chnl_data[31:0] // data for next beat
