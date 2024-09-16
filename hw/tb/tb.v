@@ -45,8 +45,7 @@ module espacc_tb ();
      #(.DMA_BUS_WIDTH(DMA_BUS_WIDTH),
        .HOST_MAX_INSTR(HOST_MAX_INSTR),
        .HOST_MAX_DATA(HOST_MAX_DATA)
-       )
-   // could also do
+       ) // could also do
    //espacc_rtl_basic_dma64
    //  #(.HOST_MAX_INSTR(HOST_MAX_INSTR),
    //    .HOST_MAX_DATA(HOST_MAX_DATA)
@@ -81,6 +80,7 @@ module espacc_tb ();
    integer cyc = 2; // one clock cycle
    integer i = 0;
    integer beats_per_pass = 8; // hardwired here and in accelerator
+   integer vals_per_pass = 4; // hardwired here and in accelerator
 
    initial begin
       // set up waveform writing
@@ -101,40 +101,40 @@ module espacc_tb ();
       // program
       // Config Inst
       // Radix 4,dir:0,twid_first:0,twid,transpose,flush all 1,done 0,vlen 4
-      MEM[0] = 32'b00000000000000001000111000110000;
+      MEM[0] = 32'b00000000000000001000111000110000;   // 0x8E30
       // Mem Inst
       // Load input data at a stride of 1 and vector stride of 4
-      MEM[1] = 32'b11111111000000100000000010011111;
+      MEM[1] = 32'b11111111000000100000000010011111;   // 0xFF02009F
       // Spad base address for loading inputs
-      MEM[2] = 32'b00000000000000000000000000000000;
+      MEM[2] = 32'b00000000000000000000000000000000;   // 0x0
       // Mem Inst
       // Load input data at a stride of 1 and vector stride of 4
-      MEM[3] = 32'b11111111000000100000000010101111;
+      MEM[3] = 32'b11111111000000100000000010101111;   // 0xFF0200AF
       // Twid mem base address
-      MEM[4] = 32'b00000000000000000000000000000000;
+      MEM[4] = 32'b00000000000000000000000000000000;   // 0x0 
       // Mem Inst
       // Store output data at a stride of 1 and vector stride of 4
-      MEM[5] = 32'b11111111000000100000000011001111;
+      MEM[5] = 32'b11111111000000100000000011001111;   // 0xFF0200CF
       // Spad base address for storing outputs
-      MEM[6] = 32'b00000000000000000000000000000000;
+      MEM[6] = 32'b00000000000000000000000000000000;   // 0x0
       // Config Inst
       // Radix 4,dir:0,twid_first:0,twid:0,transpose:1,flush:1,done:1,vlen:4
-      MEM[7] = 32'b00000000000000001001110000110000;
+      MEM[7] = 32'b00000000000000001001110000110000;   // 0x9C30  (last that is read)
       // Mem Inst
       // Load input data at a stride of 1 and vector stride of 4
-      MEM[8] = 32'b11111111000000100000000010011111;
+      MEM[8] = 32'b11111111000000100000000010011111;   // 0xFF02009F
       // Spad base address for loading inputs
-      MEM[9] = 32'b00000000000000000000000000000000;
+      MEM[9] = 32'b00000000000000000000000000000000;   // 0x0
       // Mem Inst
       // Load twiddles at a stride of 1 and vector stride of 4
-      MEM[10] = 32'b11111111000000100000000010101111;
+      MEM[10] = 32'b11111111000000100000000010101111;  // 0xFF0200AF
       // Twid mem base address
-      MEM[11] = 32'b00000000000000000000000000000000;
+      MEM[11] = 32'b00000000000000000000000000000000;  // 0x0
       // Mem Inst
       // This says to store data at a stride of 1 and vector stride of 4
-      MEM[12] = 32'b11111111000000100000000011001111;
+      MEM[12] = 32'b11111111000000100000000011001111;  // 0xFF0200CF
       // Spad base address for storing outputs
-      MEM[13] = 32'b00000000000000000000000000000000;
+      MEM[13] = 32'b00000000000000000000000000000000;  // 0x0
 
       // pad out the remaining instructions
       MEM[14] = 32'b00000000000000000000000000000000;
@@ -200,10 +200,12 @@ module espacc_tb ();
       dma_read_ctrl_ready <= 1'b0;
       #cyc;
 
-      // put program in read channel, set chnl_valid.
+      // READ PROGRAM ====================================
+      // put entire program in read channel, set chnl_valid.
       // test bench construct to replicate DMA, not synthesizable
-      for (i=0; i<dma_read_ctrl_data_length;i++) begin
-         dma_read_chnl_data <= MEM[i];
+     for (i=0; i<dma_read_ctrl_data_length;i++) begin 
+         //dma_read_chnl_data <= MEM[i]; 
+         dma_read_chnl_data <= {MEM[2*i+1],MEM[2*i]}; // need to concatenate
          dma_read_chnl_valid <= 1'b1;
          #cyc;
       end
@@ -214,8 +216,6 @@ module espacc_tb ();
 
       #(5*cyc); // for gtkwave readability
 
-      // PASS 0
-
       // accelerator in read_ctrl state, read_ctrl_valid == 1
       // host read ctrl ready
       dma_read_ctrl_ready <= 1'b1;
@@ -223,16 +223,20 @@ module espacc_tb ();
       dma_read_ctrl_ready <= 1'b0;
       #cyc;
 
-      // put the data on the channel
-      for (i=HOST_MAX_INSTR;i<HOST_MAX_INSTR+beats_per_pass;i++) begin
-         dma_read_chnl_data <= MEM[i];
+      // BEGIN PASS 1  =====================================
+      // put the first half of data on the channel
+      for (i=HOST_MAX_INSTR;i<HOST_MAX_INSTR+beats_per_pass;i+=2)
+      begin
+         //dma_read_chnl_data <= MEM[i];
+         $display("i=%3d", i);
+         dma_read_chnl_data <= {MEM[i+1],MEM[i]}; // need to concatenate
          dma_read_chnl_valid <= 1'b1;
          #cyc;
       end
       // deassert read_chnl_valid
       dma_read_chnl_valid <= 1'b0;
 
-      #(8*cyc); // takes 8 cycles to finish first pass
+      #(8*cyc); // takes 8 cycles to compute first pass
 
       // do an accelerator write to host
       dma_write_ctrl_ready <= 1'b1;
@@ -246,8 +250,11 @@ module espacc_tb ();
       dma_write_chnl_ready <= 1'b1;
 
       // read the accelerator data
+      // MEM[16]->MEM[23] are overwritten with double their original vals
       for (i=HOST_MAX_INSTR;i<HOST_MAX_INSTR+beats_per_pass;i++) begin
-         MEM[i] <= dma_write_chnl_data;
+         $display("i=%3d", i);
+         MEM[i] <= dma_write_chnl_data[31:0];
+         MEM[i+1] <= dma_write_chnl_data[63:32];
          #cyc;
       end
 
@@ -255,8 +262,7 @@ module espacc_tb ();
       dma_write_chnl_ready <= 1'b0;
       #cyc;
 
-      // PASS 1
-
+      // BEGIN PASS 2  =====================================
       // accelerator in read_ctrl state, read_ctrl_valid == 1
       // host read ctrl ready
       dma_read_ctrl_ready <= 1'b1;
@@ -264,16 +270,21 @@ module espacc_tb ();
       dma_read_ctrl_ready <= 1'b0;
       #cyc;
 
-      // put the data on the channel
-      for (i=HOST_MAX_INSTR;i<HOST_MAX_INSTR+beats_per_pass;i++) begin
-         dma_read_chnl_data <= MEM[i + beats_per_pass];
+      // put second half of data on the channel
+      //for (i=HOST_MAX_INSTR;i<HOST_MAX_INSTR+2*beats_per_pass;i++) begin
+      for (i=HOST_MAX_INSTR+beats_per_pass;i<2*HOST_MAX_INSTR;i+=2) begin
+         //dma_read_chnl_data <= MEM[i + beats_per_pass];
+         $display("i=%3d", i);
+         $display("MEM[i]=%3d", MEM[i]);
+         $display("MEM[i+1]=%3d", MEM[i+1]);
+         dma_read_chnl_data <= {MEM[i+1],MEM[i]}; // need to concatenate
          dma_read_chnl_valid <= 1'b1;
          #cyc;
       end
       // deassert read_chnl_valid
       dma_read_chnl_valid <= 1'b0;
 
-      #(8*cyc); // takes 8 cycles to finish first pass
+      #(8*cyc); // takes 8 cycles to finish second pass
 
       // do an accelerator write to host
       dma_write_ctrl_ready <= 1'b1;
@@ -287,8 +298,13 @@ module espacc_tb ();
       dma_write_chnl_ready <= 1'b1;
 
       // read the accelerator data
-      for (i=HOST_MAX_INSTR;i<HOST_MAX_INSTR+beats_per_pass;i++) begin
-         MEM[i + beats_per_pass] <= dma_write_chnl_data;
+      // MEM[24]->MEM[31] are overwritten with double their original vals
+      //for (i=HOST_MAX_INSTR;i<HOST_MAX_INSTR+beats_per_pass;i++) begin
+      for (i=HOST_MAX_INSTR+beats_per_pass;i<2*HOST_MAX_INSTR;i++) begin
+         //MEM[i + beats_per_pass] <= dma_write_chnl_data;
+         $display("i=%3d", i);
+         MEM[i] <= dma_write_chnl_data[31:0];
+         MEM[i+1] <= dma_write_chnl_data[63:32];
          #cyc;
       end
 

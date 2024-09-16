@@ -163,11 +163,11 @@ module espacc_rtl_basic_dma
          dma_read_chnl_ready <= 1'b0;
          dma_write_ctrl_valid <= 1'b0;
          dma_write_chnl_valid <= 1'b0;
-	 dma_write_chnl_data <= 64'b0; // DMA_BUS_WIDTH	 
+	 dma_write_chnl_data <= DMA_BUS_WIDTH;
+
          // local variables
          beat_ctr <= 32'b0;
          configured <= 1'b0;
-
          pgm_read <= 1'b0;
          for (i=0; i<HOST_MAX_INSTR-1; i++) PGM[i]  <= 32'b0;
          for (i=0; i<HOST_MAX_DATA-1; i++)  DATA[i] <= 32'b0;
@@ -238,16 +238,15 @@ module espacc_rtl_basic_dma
                     beat_ctr <= beat_ctr + 1;
                  end else begin // reading data
                     DATA[pass_ctr*beats_per_pass*vals_per_beat
-			 + vals_per_beat*beat_ctr]
-			    <= dma_read_chnl_data[31:0];
+                	 + vals_per_beat*beat_ctr]
+    		            <= dma_read_chnl_data[31:0];
                     debug0 <= dma_read_chnl_data[31:0];
 		    DATA[pass_ctr*beats_per_pass*vals_per_beat
-			 + vals_per_beat*beat_ctr + 1]
+                    	 + vals_per_beat*beat_ctr + 1]
 		      <= dma_read_chnl_data[63:32];
                     debug1 <= dma_read_chnl_data[63:32];
                     beat_ctr <= beat_ctr + 1;
                  end
-
                  // mark prgm_read, transition to next state
                  if (!pgm_read && beat_ctr == prog_num_instr_beats - 1) begin
                     pgm_read <= 1'b1;
@@ -263,13 +262,13 @@ module espacc_rtl_basic_dma
            end // case: READ_CHNL
            COMPUTE: begin // 011
 	      // using beat_ctr, but counting values not beats
-              DATA[pass_ctr*beats_per_pass*vals_per_beat + beat_ctr]
-                <= 2 * DATA[pass_ctr*beats_per_pass*vals_per_beat + beat_ctr];
+              DATA[pass_ctr*beats_per_pass*vals_per_beat+beat_ctr]
+                 <= 2*DATA[pass_ctr*beats_per_pass*vals_per_beat + beat_ctr];
 	      debug0
                 <= DATA[pass_ctr*beats_per_pass*vals_per_beat + beat_ctr];
 	      debug1
-                <= 2 * DATA[pass_ctr*beats_per_pass*vals_per_beat + beat_ctr];
-              beat_ctr <= beat_ctr + 1; 
+                <= 2*DATA[pass_ctr*beats_per_pass*vals_per_beat + beat_ctr];
+              beat_ctr <= beat_ctr + 1;
 
               if (beat_ctr == beats_per_pass*vals_per_beat - 1) begin
                  // set write ctrl values
@@ -291,7 +290,6 @@ module espacc_rtl_basic_dma
                  beat_ctr <= 32'b0;
                  dma_write_ctrl_valid <= 1'b0;
                  state <= WRITE_CHNL;
-
 		 dma_write_chnl_data[31:0] // chnl data for beat_ctr == 0
                    <= DATA[pass_ctr*beats_per_pass*vals_per_beat];
 		 dma_write_chnl_data[63:32]
@@ -300,7 +298,7 @@ module espacc_rtl_basic_dma
            end // case: WRITE_CTRL
            WRITE_CHNL: begin // 101
 	      dma_write_chnl_valid <= 1'b1;
-	      
+
               if (dma_write_chnl_ready) begin
 		 // is it possible that this reads past the end of DATA?
 		 dma_write_chnl_data[31:0] // data for next beat
